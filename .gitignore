@@ -73,3 +73,23 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# ---------------------------
+# ADDITIONS: prevent line-ending & VSCode noise
+# ---------------------------
+
+# VS Code local settings (often cause LF/CRLF changes)
+.vscode/
+.vscode/*
+
+# (Optional) keep only extensions.json if shared with team
+# !.vscode/extensions.json
+
+# Normalize text files to LF (avoids CRLF/LF warnings)
+# This line doesn't ignore files, but instructs Git to treat all text consistently
+# (You can also put this in a .gitattributes file)
+* text=auto eol=lf
+
+# Temporary system files
+.DS_Store
+Thumbs.db
