@@ -5,76 +5,92 @@ using UnityEngine.InputSystem;
 
 namespace StarterAssets
 {
-	public class StarterAssetsInputs : MonoBehaviour
-	{
-		[Header("Character Input Values")]
-		public Vector2 move;
-		public Vector2 look;
-		public bool jump;
-		public bool sprint;
+    public class StarterAssetsInputs : MonoBehaviour
+    {
+        [Header("Character Input Values")]
+        public Vector2 move;
+        public Vector2 look;
+        public bool jump;
+        public bool sprint;
+        public bool dash;
+        public bool pogo;
 
-		[Header("Movement Settings")]
-		public bool analogMovement;
+        [Header("Movement Settings")]
+        public bool analogMovement = true;
 
-		[Header("Mouse Cursor Settings")]
-		public bool cursorLocked = true;
-		public bool cursorInputForLook = true;
+        [Header("Mouse Cursor Settings")]
+        public bool cursorLocked = true;
+        public bool cursorInputForLook = true;
+
+        [Header("Sprint From Stick")]
+        [Range(0f, 1f)] public float sprintThreshold = 0.9f;
+        public bool useStickToSprint = true;
 
 #if ENABLE_INPUT_SYSTEM
-		public void OnMove(InputValue value)
-		{
-			MoveInput(value.Get<Vector2>());
-		}
+        public void OnMove(InputValue value)
+        {
+            MoveInput(value.Get<Vector2>());
+        }
 
-		public void OnLook(InputValue value)
-		{
-			if(cursorInputForLook)
-			{
-				LookInput(value.Get<Vector2>());
-			}
-		}
+        public void OnLook(InputValue value)
+        {
+            if (cursorInputForLook)
+                LookInput(value.Get<Vector2>());
+        }
 
-		public void OnJump(InputValue value)
-		{
-			JumpInput(value.isPressed);
-		}
+        public void OnJump(InputValue value)
+        {
+            JumpInput(value.isPressed);
+        }
 
-		public void OnSprint(InputValue value)
-		{
-			SprintInput(value.isPressed);
-		}
+        public void OnSprint(InputValue value)
+        {
+            if (!useStickToSprint)
+                SprintInput(value.isPressed);
+        }
+
+        public void OnPogo(InputValue value)
+        {
+            PogoInput(value.isPressed);
+        }
+
+        public void OnDash(InputValue value)
+        {
+            DashInput(value.isPressed);
+        }
 #endif
 
+        public void MoveInput(Vector2 newMoveDirection) => move = newMoveDirection;
+        public void LookInput(Vector2 newLookDirection) => look = newLookDirection;
+        public void JumpInput(bool newJumpState) => jump = newJumpState;
+        public void SprintInput(bool newSprintState) => sprint = newSprintState;
+        public void PogoInput(bool newPogoState) => pogo = newPogoState;
+        public void DashInput(bool newDashState) => dash = newDashState;
 
-		public void MoveInput(Vector2 newMoveDirection)
-		{
-			move = newMoveDirection;
-		} 
+        void Update()
+        {
+#if ENABLE_INPUT_SYSTEM
+            if (useStickToSprint)
+            {
+                bool gamepadActive = Gamepad.current != null && Gamepad.current.wasUpdatedThisFrame;
+                if (gamepadActive)
+                {
+                    float sq = move.sqrMagnitude;
+                    float th = sprintThreshold * sprintThreshold;
+                    sprint = sq >= th;
+                }
+            }
+#endif
+        }
 
-		public void LookInput(Vector2 newLookDirection)
-		{
-			look = newLookDirection;
-		}
+        private void OnApplicationFocus(bool hasFocus)
+        {
+            SetCursorState(cursorLocked);
+        }
 
-		public void JumpInput(bool newJumpState)
-		{
-			jump = newJumpState;
-		}
-
-		public void SprintInput(bool newSprintState)
-		{
-			sprint = newSprintState;
-		}
-
-		private void OnApplicationFocus(bool hasFocus)
-		{
-			SetCursorState(cursorLocked);
-		}
-
-		private void SetCursorState(bool newState)
-		{
-			Cursor.lockState = newState ? CursorLockMode.Locked : CursorLockMode.None;
-		}
-	}
-	
+        public void SetCursorState(bool newState)
+        {
+            Cursor.lockState = newState ? CursorLockMode.Locked : CursorLockMode.None;
+        }
+    }
 }
