@@ -27,70 +27,45 @@ namespace StarterAssets
         public bool useStickToSprint = true;
 
 #if ENABLE_INPUT_SYSTEM
-        public void OnMove(InputValue value)
-        {
-            MoveInput(value.Get<Vector2>());
-        }
-
-        public void OnLook(InputValue value)
-        {
-            if (cursorInputForLook)
-                LookInput(value.Get<Vector2>());
-        }
-
-        public void OnJump(InputValue value)
-        {
-            JumpInput(value.isPressed);
-        }
-
-        public void OnSprint(InputValue value)
-        {
-            if (!useStickToSprint)
-                SprintInput(value.isPressed);
-        }
-
-        public void OnPogo(InputValue value)
-        {
-            PogoInput(value.isPressed);
-        }
-
-        public void OnDash(InputValue value)
-        {
-            DashInput(value.isPressed);
-        }
+        public void OnMove(InputValue value) { MoveInput(value.Get<Vector2>()); }
+        public void OnLook(InputValue value) { if (cursorInputForLook) LookInput(value.Get<Vector2>()); }
+        public void OnJump(InputValue value) { JumpInput(value.isPressed); }
+        public void OnSprint(InputValue value) { if (!useStickToSprint) SprintInput(value.isPressed); }
+        public void OnPogo(InputValue value) { PogoInput(value.isPressed); }
+        public void OnDash(InputValue value) { DashInput(value.isPressed); }
 #endif
 
-        public void MoveInput(Vector2 newMoveDirection) => move = newMoveDirection;
-        public void LookInput(Vector2 newLookDirection) => look = newLookDirection;
-        public void JumpInput(bool newJumpState) => jump = newJumpState;
-        public void SprintInput(bool newSprintState) => sprint = newSprintState;
-        public void PogoInput(bool newPogoState) => pogo = newPogoState;
-        public void DashInput(bool newDashState) => dash = newDashState;
+        public void MoveInput(Vector2 v) => move = v;
+        public void LookInput(Vector2 v) => look = v;
+        public void JumpInput(bool v) => jump = v;
+        public void SprintInput(bool v) => sprint = v;
+        public void PogoInput(bool v) => pogo = v;
+        public void DashInput(bool v) => dash = v;
 
         void Update()
         {
 #if ENABLE_INPUT_SYSTEM
             if (useStickToSprint)
             {
-                bool gamepadActive = Gamepad.current != null && Gamepad.current.wasUpdatedThisFrame;
-                if (gamepadActive)
+                bool pad = Gamepad.current != null && Gamepad.current.wasUpdatedThisFrame;
+                bool kb = Keyboard.current != null && Keyboard.current.wasUpdatedThisFrame;
+
+                if (pad)
                 {
-                    float sq = move.sqrMagnitude;
+                    // Sur manette, sprint seulement si le stick est poussé fort
                     float th = sprintThreshold * sprintThreshold;
-                    sprint = sq >= th;
+                    sprint = move.sqrMagnitude >= th;
+                }
+                else if (kb)
+                {
+                    // Sur clavier, on court dès qu’on bouge
+                    sprint = move.sqrMagnitude > 0.01f;
                 }
             }
 #endif
         }
 
-        private void OnApplicationFocus(bool hasFocus)
-        {
-            SetCursorState(cursorLocked);
-        }
-
-        public void SetCursorState(bool newState)
-        {
-            Cursor.lockState = newState ? CursorLockMode.Locked : CursorLockMode.None;
-        }
+        private void OnApplicationFocus(bool hasFocus) { SetCursorState(cursorLocked); }
+        public void SetCursorState(bool s) { Cursor.lockState = s ? CursorLockMode.Locked : CursorLockMode.None; }
     }
 }
